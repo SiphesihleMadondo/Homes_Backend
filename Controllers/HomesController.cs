@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Homes.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -29,8 +30,23 @@ namespace Homes.Controllers
             return await _context.Applicants.ToListAsync();
         }
 
+        //GET: users
+        [Route("GetUsers")]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<User>>> GetUsers(){
+            return await _context.Users.ToListAsync();
+        }
+
+        //GET Provinces
+        [Route("GetProvinces")]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Province>>> GetProvinces()
+        {
+            return await _context.Provinces.ToListAsync();
+        }
+
         // GET: api/Homes/5
-        
+
         [HttpGet("GetApplicant/{id}")]
         
         public async Task<ActionResult<Applicant>> GetApplicant(int id)
@@ -88,6 +104,17 @@ namespace Homes.Controllers
 
             return CreatedAtAction("GetApplicant", new { id = applicant.Id }, applicant);
         }
+        // POST: Api/Homes
+        [Route("SignUp")]
+        [HttpPost]
+        public async Task<ActionResult<User>> SignUp(User user)
+        {   
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetUsers", new { id = user.Email }, user);
+        }
+
 
         // DELETE: api/Homes/5
         [HttpDelete("DeleteApplicant/{id}")]
@@ -109,7 +136,21 @@ namespace Homes.Controllers
         {
             return _context.Applicants.Any(e => e.Id == id);
         }
-        
-        
+
+        [HttpGet]
+        [Route("Checkuser/ {email}")]
+        public async Task<IActionResult> signin([FromRoute] string email, string password)
+        {
+            var useremail = await _context.Users.FindAsync(email);
+            var userpassword = await _context.Users.FindAsync(password);
+            if (useremail == null)
+            {
+                return Ok("email not found");
+            }
+
+            return Ok(useremail);
+        }
+
+
     }
 }
